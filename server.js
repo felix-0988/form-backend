@@ -1,32 +1,140 @@
 require('dotenv').config();
 const express = require('express');
-const { Pool } = require('pg');
-const sgMail = require('@sendgrid/mail');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
-const { RateLimiterPostgres } = require('rate-limiter-flexible');
+const crypto = require('crypto');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DB_PATH = process.env.DB_PATH || './data/forms.db';
 
-// Init SendGrid
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Email mock function (logs to console instead of sending)
+async function mockSendEmail(to, subject, text, html, isSpam = false) {
+  const timestamp = new Date().toISOString();
+  console.log('\n' + '═'.repeat(60));
+  console.log('📧 EMAIL NOTIFICATION - New Form Submission');
+  console.log('═'.repeat(60));
+  console.log(`To: ${to}`);
+  console.log(`Subject: ${subject}`);
+  console.log('─'.repeat(60));
+  console.log('--- Submission Data ---');
+  console.log(text);
+  console.log('─'.repeat(60));
+  console.log('--- Metadata ---');
+  console.log(`Time: ${timestamp}`);
+  if (isSpam) console.log('⚠️  FLAGGED AS SPAM');
+  console.log('═'.repeat(60) + '\n');
+  return { messageId: `mock-${Date.now()}` };
+}
 
-// Database pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+// Ensure data directory exists
+const dataDir = path.dirname(DB_PATH);
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Initialize SQLite database
+const db = new sqlite3.Database(DB_PATH, (err) => {
+  if (err) {
+    console.error('❌ Database connection failed:', err.message);
+    process.exit(1);
+  }
+  console.log('✅ Connected to SQLite database at', DB_PATH);
 });
 
-// Rate limiter
-const rateLimiter = new RateLimiterPostgres({
-  storeClient: pool,
-  keyPrefix: 'form_submit',
-  points: parseInt(process.env.RATE_LIMIT_POINTS) || 10,
-  duration: parseInt(process.env.RATE_LIMIT_DURATION) || 60,
-  tableName: 'rate_limits',
-  tableCreated: true
+// Enable foreign keys and create tables
+db.serialize(() => {
+  db.run('PRAGMA foreign_keys = ON');
+  
+  // Create forms table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS forms (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      owner_email TEXT NOT NULL,
+      honeypot_field TEXT DEFAULT '_website',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  
+  // Create submissions table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS submissions (
+      id TEXT PRIMARY KEY,
+      form_id TEXT NOT NULL,
+      data TEXT NOT NULL,
+      ip_address TEXT,
+      user_agent TEXT,
+      is_spam INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
+    )
+  `);
+  
+  // Create indexes
+  db.run('CREATE INDEX IF NOT EXISTS idx_submissions_form_id ON submissions(form_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at)');
+  
+  console.log('✅ Database schema initialized');
 });
+
+// Simple in-memory rate limiter
+const rateLimiter = {
+  requests: new Map(),
+  
+  async consume(key) {
+    const now = Date.now();
+    const windowMs = (parseInt(process.env.RATE_LIMIT_DURATION) || 60) * 1000;
+    const maxRequests = parseInt(process.env.RATE_LIMIT_POINTS) || 10;
+    
+    if (!this.requests.has(key)) {
+      this.requests.set(key, []);
+    }
+    
+    const requests = this.requests.get(key);
+    
+    // Remove old requests outside the window
+    const validRequests = requests.filter(time => now - time < windowMs);
+    
+    if (validRequests.length >= maxRequests) {
+      throw new Error('Rate limit exceeded');
+    }
+    
+    validRequests.push(now);
+    this.requests.set(key, validRequests);
+  }
+};
+
+// Promisify database methods
+function dbGet(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+}
+
+function dbAll(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+}
+
+function dbRun(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function(err) {
+      if (err) reject(err);
+      else resolve({ lastID: this.lastID, changes: this.changes });
+    });
+  });
+}
 
 // Middleware
 app.use(helmet());
@@ -39,6 +147,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Generate UUID
+function generateUUID() {
+  return crypto.randomUUID();
+}
+
 // === API: Create New Form ===
 app.post('/api/forms/create', async (req, res) => {
   try {
@@ -48,13 +161,14 @@ app.post('/api/forms/create', async (req, res) => {
       return res.status(400).json({ error: 'Valid owner_email required' });
     }
 
-    const result = await pool.query(
-      `INSERT INTO forms (name, owner_email, honeypot_field) 
-       VALUES ($1, $2, $3) RETURNING *`,
-      [name, owner_email, honeypot_field]
+    const id = generateUUID();
+    
+    await dbRun(
+      `INSERT INTO forms (id, name, owner_email, honeypot_field) VALUES (?, ?, ?, ?)`,
+      [id, name || null, owner_email, honeypot_field]
     );
 
-    const form = result.rows[0];
+    const form = await dbGet('SELECT * FROM forms WHERE id = ?', [id]);
     const submitUrl = `${req.protocol}://${req.get('host')}/api/forms/${form.id}/submit`;
     const dashboardUrl = `${req.protocol}://${req.get('host')}/dashboard/${form.id}`;
 
@@ -75,7 +189,7 @@ app.post('/api/forms/create', async (req, res) => {
         html_example: `<form action="${submitUrl}" method="POST">
   <input type="text" name="name" placeholder="Your Name" required>
   <input type="email" name="email" placeholder="Your Email" required>
-  <input type="${honeypot_field}" name="${honeypot_field}" style="display:none">
+  <input type="${honeypot_field}" name="${honeypot_field}" style="display:none" tabindex="-1" autocomplete="off">
   <button type="submit">Send</button>
 </form>`
       }
@@ -94,7 +208,7 @@ app.post('/api/forms/:formId/submit', async (req, res) => {
     const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const userAgent = req.headers['user-agent'];
 
-    // Rate limit check (trap errors silently for spam)
+    // Rate limit check
     try {
       await rateLimiter.consume(formId);
     } catch {
@@ -102,58 +216,36 @@ app.post('/api/forms/:formId/submit', async (req, res) => {
     }
 
     // Get form config
-    const formResult = await pool.query('SELECT * FROM forms WHERE id = $1', [formId]);
-    if (formResult.rows.length === 0) {
+    const form = await dbGet('SELECT * FROM forms WHERE id = ?', [formId]);
+    if (!form) {
       return res.status(404).json({ error: 'Form not found' });
     }
-    const form = formResult.rows[0];
 
     // Honeypot spam check
     const honeypotField = form.honeypot_field;
     const isSpam = submissionData[honeypotField] && submissionData[honeypotField].toString().trim() !== '';
 
     // Store submission
-    const subResult = await pool.query(
-      `INSERT INTO submissions (form_id, data, ip_address, user_agent, is_spam) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [formId, JSON.stringify(submissionData), ipAddress, userAgent, isSpam]
+    const submissionId = generateUUID();
+    await dbRun(
+      `INSERT INTO submissions (id, form_id, data, ip_address, user_agent, is_spam) VALUES (?, ?, ?, ?, ?, ?)`,
+      [submissionId, formId, JSON.stringify(submissionData), ipAddress, userAgent, isSpam ? 1 : 0]
     );
 
-    // Send email notification (even for spam, but mark it)
-    if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY !== 'your-sendgrid-api-key') {
-      const msg = {
-        to: form.owner_email,
-        from: 'forms@formbackend.com',
-        subject: isSpam ? `[SPAM] New submission on "${form.name || 'Your form'}"` : `New submission on "${form.name || 'Your form'}"`,
-        text: `New form submission received:
-
-${JSON.stringify(submissionData, null, 2)}
-
----
-Submission ID: ${subResult.rows[0].id}
-Time: ${subResult.rows[0].created_at}
-IP: ${ipAddress}
-${isSpam ? '** Flagged as SPAM **' : ''}
-
-View all submissions: ${req.protocol}://${req.get('host')}/dashboard/${formId}`,
-        html: `
-          <h2>New Form Submission</h2>
-          <p><strong>Form:</strong> ${form.name || 'Unnamed form'}</p>
-          ${isSpam ? '<p style="color: red; font-weight: bold;">⚠️ Flagged as SPAM</p>' : ''}
-          <h3>Data:</h3>
-          <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${JSON.stringify(submissionData, null, 2)}</pre>
-          <p><a href="${req.protocol}://${req.get('host')}/dashboard/${formId}" style="background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Dashboard</a></p>
-          <hr>
-          <small>Submission ID: ${subResult.rows[0].id} | ${new Date().toISOString()}</small>
-        `
-      };
-
-      try {
-        await sgMail.send(msg);
-      } catch (emailErr) {
-        console.error('Email send error:', emailErr);
-      }
-    }
+    // Send email notification mock
+    const emailSubject = isSpam 
+      ? `[SPAM] New submission on "${form.name || 'Your form'}"` 
+      : `New submission on "${form.name || 'Your form'}"`;
+    
+    const emailText = JSON.stringify(submissionData, null, 2);
+    
+    await mockSendEmail(
+      form.owner_email, 
+      emailSubject, 
+      emailText, 
+      null, 
+      isSpam
+    );
 
     // Return success (don't reveal spam status to bots)
     res.status(200).json({
@@ -171,8 +263,7 @@ View all submissions: ${req.protocol}://${req.get('host')}/dashboard/${formId}`,
 app.get('/api/forms/:formId/submissions', async (req, res) => {
   try {
     const { formId } = req.params;
-    const { token } = req.query;
-    const { spam = 'false' } = req.query;
+    const { token, spam = 'false' } = req.query;
 
     // Simple auth check
     if (token !== process.env.DASHBOARD_AUTH_TOKEN) {
@@ -180,25 +271,36 @@ app.get('/api/forms/:formId/submissions', async (req, res) => {
     }
 
     // Verify form exists
-    const formResult = await pool.query('SELECT * FROM forms WHERE id = $1', [formId]);
-    if (formResult.rows.length === 0) {
+    const form = await dbGet('SELECT * FROM forms WHERE id = ?', [formId]);
+    if (!form) {
       return res.status(404).json({ error: 'Form not found' });
     }
 
     // Get submissions
     const includeSpam = spam === 'true';
-    const filter = includeSpam ? '' : 'AND is_spam = FALSE';
+    let sql = 'SELECT * FROM submissions WHERE form_id = ?';
+    const params = [formId];
     
-    const subResult = await pool.query(
-      `SELECT * FROM submissions WHERE form_id = $1 ${filter} ORDER BY created_at DESC`,
-      [formId]
-    );
+    if (!includeSpam) {
+      sql += ' AND is_spam = 0';
+    }
+    
+    sql += ' ORDER BY created_at DESC';
+    
+    const submissions = await dbAll(sql, params);
+
+    // Parse JSON data
+    const parsedSubmissions = submissions.map(sub => ({
+      ...sub,
+      data: JSON.parse(sub.data),
+      is_spam: sub.is_spam === 1
+    }));
 
     res.json({
       success: true,
-      form: formResult.rows[0],
-      count: subResult.rows.length,
-      submissions: subResult.rows
+      form: form,
+      count: parsedSubmissions.length,
+      submissions: parsedSubmissions
     });
   } catch (err) {
     console.error('Get submissions error:', err);
@@ -243,20 +345,22 @@ app.get('/dashboard/:formId', async (req, res) => {
     }
 
     // Get form and submissions
-    const formResult = await pool.query('SELECT * FROM forms WHERE id = $1', [formId]);
-    if (formResult.rows.length === 0) {
+    const form = await dbGet('SELECT * FROM forms WHERE id = ?', [formId]);
+    if (!form) {
       return res.status(404).send('<h1>Form not found</h1>');
     }
-    const form = formResult.rows[0];
 
-    const subResult = await pool.query(
-      `SELECT * FROM submissions WHERE form_id = $1 ORDER BY created_at DESC LIMIT 100`,
+    const submissions = await dbAll(
+      'SELECT * FROM submissions WHERE form_id = ? ORDER BY created_at DESC LIMIT 100',
       [formId]
     );
 
-    const submissions = subResult.rows;
-    const totalCount = await pool.query('SELECT COUNT(*) FROM submissions WHERE form_id = $1', [formId]);
-    const spamCount = await pool.query('SELECT COUNT(*) FROM submissions WHERE form_id = $1 AND is_spam = TRUE', [formId]);
+    const totalCount = await dbGet('SELECT COUNT(*) as count FROM submissions WHERE form_id = ?', [formId]);
+    const spamCount = await dbGet('SELECT COUNT(*) as count FROM submissions WHERE form_id = ? AND is_spam = 1', [formId]);
+    const last7Days = await dbGet(
+      "SELECT COUNT(*) as count FROM submissions WHERE form_id = ? AND created_at > datetime('now', '-7 days')",
+      [formId]
+    );
 
     // Generate HTML
     const dashboardHtml = `
@@ -312,15 +416,15 @@ app.get('/dashboard/:formId', async (req, res) => {
     <div class="stats">
       <div class="stat-card">
         <h3>Total Submissions</h3>
-        <div class="number">${totalCount.rows[0].count}</div>
+        <div class="number">${totalCount.count}</div>
       </div>
       <div class="stat-card spam">
         <h3>Spam Blocked</h3>
-        <div class="number" style="color: #ff4444;">${spamCount.rows[0].count}</div>
+        <div class="number" style="color: #ff4444;">${spamCount.count}</div>
       </div>
       <div class="stat-card">
         <h3>Last 7 Days</h3>
-        <div class="number">${await pool.query('SELECT COUNT(*) FROM submissions WHERE form_id = $1 AND created_at > NOW() - INTERVAL \'7 days\'', [formId]).then(r => r.rows[0].count)}</div>
+        <div class="number">${last7Days.count}</div>
       </div>
     </div>
 
@@ -342,7 +446,7 @@ app.get('/dashboard/:formId', async (req, res) => {
           ${submissions.map(sub => `
             <tr>
               <td style="white-space: nowrap; font-size: 13px; color: #666;">${new Date(sub.created_at).toLocaleString()}</td>
-              <td class="data-cell"><pre>${JSON.stringify(sub.data, null, 2)}</pre></td>
+              <td class="data-cell"><pre>${JSON.stringify(JSON.parse(sub.data), null, 2)}</pre></td>
               <td style="font-size: 13px; color: #666;">${sub.ip_address || 'N/A'}</td>
               <td>${sub.is_spam ? '<span class="spam-badge">SPAM</span>' : '<span style="color: #4CAF50;">✓ Valid</span>'}</td>
             </tr>
@@ -367,6 +471,7 @@ app.get('/', (req, res) => {
   res.json({
     service: 'Form Backend-as-a-Service',
     version: '1.0.0',
+    database: 'SQLite',
     endpoints: {
       create_form: 'POST /api/forms/create',
       submit: 'POST /api/forms/:formId/submit',
@@ -387,6 +492,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Form Backend Service running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
+  console.log(`🔗 Create form: POST http://localhost:${PORT}/api/forms/create`);
 });
 
 module.exports = app;

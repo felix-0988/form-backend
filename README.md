@@ -1,30 +1,64 @@
-# Form Backend-as-a-Service MVP
+# Form Backend-as-a-Service MVP (SQLite Edition)
 
-A complete backend-as-a-service for handling HTML form submissions. Deployed and live!
-
-## Live URLs
-
-- **Live Application**: https://form-backend-service.onrender.com
-- **Health Check**: https://form-backend-service.onrender.com/health
+A complete backend-as-a-service for handling HTML form submissions using **SQLite** (no PostgreSQL required) and **console.log** for email notifications (no SendGrid required). Pure local Express + SQLite solution.
 
 ## Features Checklist ✅
 
 | Feature | Status | Description |
 |---------|--------|-------------|
 | Unique Form Endpoints | ✅ | Auto-generated UUID endpoints for each form |
-| Submission Storage | ✅ | PostgreSQL with JSONB data storage + timestamps |
-| Email Notifications | ✅ | SendGrid integration - instant email alerts |
+| Submission Storage | ✅ | SQLite database with JSON data storage |
+| Email Notifications | ✅ | Console.log output (simulates email alerts) |
 | Dashboard View | ✅ | HTML dashboard with submission statistics |
 | Spam Filtering | ✅ | Honeypot field for bot detection |
-| Rate Limiting | ✅ | Configurable per-form rate limiting |
+| Rate Limiting | ✅ | In-memory rate limiting per form |
 | API Access | ✅ | Full REST API for programmatic access |
 
 ## Quick Start
 
-### 1. Create a Form
+### 1. Install Dependencies
 
 ```bash
-curl -X POST https://form-backend-service.onrender.com/api/forms/create \
+npm install
+```
+
+### 2. Configure Environment
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+```
+# SQLite Database Path (optional, defaults to ./database.sqlite)
+DATABASE_PATH=./database.sqlite
+
+# App Config
+PORT=3000
+NODE_ENV=development
+
+# Dashboard Auth (simple token-based)
+DASHBOARD_AUTH_TOKEN=your-secret-dashboard-token
+
+# Rate Limiting
+RATE_LIMIT_POINTS=10
+RATE_LIMIT_DURATION=60
+```
+
+### 3. Start the Server
+
+```bash
+npm start
+```
+
+Server will start on `http://localhost:3000`
+
+### 4. Create a Form
+
+```bash
+curl -X POST http://localhost:3000/api/forms/create \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Contact Form",
@@ -42,17 +76,17 @@ Returns:
     "owner_email": "you@example.com"
   },
   "endpoints": {
-    "submit": "https://form-backend-service.onrender.com/api/forms/a7f3c8d9-.../submit",
-    "dashboard": "https://form-backend-service.onrender.com/dashboard/a7f3c8d9-...",
-    "submissions_api": "https://form-backend-service.onrender.com/api/forms/a7f3c8d9-.../submissions"
+    "submit": "http://localhost:3000/api/forms/a7f3c8d9-.../submit",
+    "dashboard": "http://localhost:3000/dashboard/a7f3c8d9-...",
+    "submissions_api": "http://localhost:3000/api/forms/a7f3c8d9-.../submissions"
   }
 }
 ```
 
-### 2. Integration in Your Static Site
+### 5. Integration in Your Static Site
 
 ```html
-<form action="https://form-backend-service.onrender.com/api/forms/YOUR-FORM-ID/submit" method="POST">
+<form action="http://localhost:3000/api/forms/YOUR-FORM-ID/submit" method="POST">
   <input type="text" name="name" placeholder="Your Name" required>
   <input type="email" name="email" placeholder="Your Email" required>
   <textarea name="message" placeholder="Your Message"></textarea>
@@ -64,16 +98,16 @@ Returns:
 </form>
 ```
 
-### 3. View Submissions
+### 6. View Submissions
 
 Go to your dashboard URL:
 ```
-https://form-backend-service.onrender.com/dashboard/YOUR-FORM-ID?token=YOUR_AUTH_TOKEN
+http://localhost:3000/dashboard/YOUR-FORM-ID?token=YOUR_AUTH_TOKEN
 ```
 
 Or via API:
 ```bash
-curl "https://form-backend-service.onrender.com/api/forms/YOUR-FORM-ID/submissions?token=YOUR_AUTH_TOKEN"
+curl "http://localhost:3000/api/forms/YOUR-FORM-ID/submissions?token=YOUR_AUTH_TOKEN"
 ```
 
 ## API Documentation
@@ -86,7 +120,7 @@ Create a new form endpoint.
 {
   "name": "My Contact Form",
   "owner_email": "admin@example.com",
-  "honeypot_field": "_website"  // optional, default is "_website"
+  "honeypot_field": "_website"
 }
 ```
 
@@ -96,9 +130,9 @@ Create a new form endpoint.
   "success": true,
   "form": { "id": "...", "name": "...", "owner_email": "...", "created_at": "..." },
   "endpoints": {
-    "submit": "https://.../api/forms/.../submit",
-    "dashboard": "https://.../dashboard/...",
-    "submissions_api": "https://.../api/forms/.../submissions"
+    "submit": "http://.../api/forms/.../submit",
+    "dashboard": "http://.../dashboard/...",
+    "submissions_api": "http://.../api/forms/.../submissions"
   },
   "integration": {
     "html_example": "<form ...>...</form>"
@@ -122,6 +156,24 @@ Submit data to a form. **Public endpoint** - no auth required.
 ```
 
 **Spam Handling:** If the honeypot field is filled, submission is flagged as spam but returns same response (deceptive for bots).
+
+**Email Notification:** When a submission is received, the server prints an email notification to the console:
+```
+═══════════════════════════════════════════════════════════
+📧 EMAIL NOTIFICATION - New Form Submission
+═══════════════════════════════════════════════════════════
+To: owner@example.com
+Subject: New submission on "Contact Form"
+
+--- Submission Data ---
+{"name":"John","email":"john@example.com","message":"Hello"}
+
+--- Metadata ---
+Submission ID: xxx
+Time: 2024-...
+IP: 192.168.1.1
+═══════════════════════════════════════════════════════════
+```
 
 ---
 
@@ -183,56 +235,38 @@ Health check endpoint.
 ### Forms Table
 ```sql
 CREATE TABLE forms (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255),
-  owner_email VARCHAR(255) NOT NULL,
-  honeypot_field VARCHAR(50) DEFAULT '_website',
-  created_at TIMESTAMP DEFAULT NOW()
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  owner_email TEXT NOT NULL,
+  honeypot_field TEXT DEFAULT '_website',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
 ### Submissions Table
 ```sql
 CREATE TABLE submissions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  form_id UUID REFERENCES forms(id) ON DELETE CASCADE,
-  data JSONB NOT NULL,
-  ip_address INET,
+  id TEXT PRIMARY KEY,
+  form_id TEXT NOT NULL,
+  data TEXT NOT NULL,
+  ip_address TEXT,
   user_agent TEXT,
-  is_spam BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT NOW()
+  is_spam INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
 );
 ```
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
-| `SENDGRID_API_KEY` | SendGrid API key for emails | Yes |
-| `PORT` | Server port (default: 3000) | No |
-| `NODE_ENV` | production/development | Yes |
-| `DASHBOARD_AUTH_TOKEN` | Secret token for dashboard access | Yes |
-| `RATE_LIMIT_POINTS` | Max requests per duration (default: 10) | No |
-| `RATE_LIMIT_DURATION` | Rate limit window in seconds (default: 60) | No |
-
-## Deployment
-
-### Deploy to Render
-
-1. Fork this repository
-2. Create a new Web Service on Render
-3. Add environment variables in Render dashboard
-4. Deploy!
-
-### Deploy to Railway
-
-```bash
-railway login
-railway init
-railway add --database postgresql
-railway up
-```
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `DATABASE_PATH` | SQLite database file path | No | `./database.sqlite` |
+| `PORT` | Server port | No | `3000` |
+| `NODE_ENV` | production/development | No | `development` |
+| `DASHBOARD_AUTH_TOKEN` | Secret token for dashboard access | Yes | - |
+| `RATE_LIMIT_POINTS` | Max requests per duration | No | `10` |
+| `RATE_LIMIT_DURATION` | Rate limit window in seconds | No | `60` |
 
 ## Security Features
 
@@ -240,15 +274,15 @@ railway up
 - **Rate limiting**: Configurable per-form rate limiting to prevent abuse
 - **Helmet.js**: Security headers for XSS, CSRF protection
 - **CORS**: Configurable cross-origin settings
-- **Input sanitization**: PostgreSQL parameterized queries prevent SQL injection
+- **Input sanitization**: SQLite parameterized queries prevent SQL injection
 
 ## Technologies Used
 
 - **Node.js** + **Express** - Web framework
-- **PostgreSQL** - Data persistence
-- **SendGrid** - Email delivery
+- **SQLite3** - Data persistence (local file-based)
+- **Console.log** - Email notification simulation
 - **Helmet** - Security headers
-- **Rate Limiter** - Request throttling
+- **In-memory Rate Limiter** - Request throttling
 - **UUID** - Unique identifier generation
 
 ## Repo Structure
@@ -257,10 +291,41 @@ railway up
 form-backend-mvp/
 ├── server.js              # Main application
 ├── package.json           # Dependencies
-├── scripts/
-│   └── setup-db.js       # Database initialization
-├── README.md              # Documentation
-└── .env.example          # Environment template
+├── .env                   # Environment variables (create from .env.example)
+├── .env.example          # Environment template
+├── database.sqlite       # SQLite database (auto-created)
+└── README.md             # Documentation
+```
+
+## Testing All Endpoints
+
+```bash
+# 1. Health check
+curl http://localhost:3000/health
+
+# 2. Create a form
+curl -X POST http://localhost:3000/api/forms/create \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test Form","owner_email":"test@example.com"}'
+
+# 3. Submit to form (normal)
+curl -X POST http://localhost:3000/api/forms/YOUR-FORM-ID/submit \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John","email":"john@example.com","message":"Hello"}'
+
+# 4. Submit to form (spam - honeypot filled)
+curl -X POST http://localhost:3000/api/forms/YOUR-FORM-ID/submit \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Spam","email":"spam@example.com","_website":"spam.com"}'
+
+# 5. Get submissions (without spam)
+curl "http://localhost:3000/api/forms/YOUR-FORM-ID/submissions?token=YOUR_AUTH_TOKEN"
+
+# 6. Get submissions (with spam)
+curl "http://localhost:3000/api/forms/YOUR-FORM-ID/submissions?token=YOUR_AUTH_TOKEN&spam=true"
+
+# 7. View dashboard
+curl "http://localhost:3000/dashboard/YOUR-FORM-ID?token=YOUR_AUTH_TOKEN"
 ```
 
 ## License

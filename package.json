@@ -1,24 +1,21 @@
 {
   "name": "form-backend-service",
   "version": "1.0.0",
-  "description": "Form Backend-as-a-Service MVP",
+  "description": "Form Backend-as-a-Service MVP - SQLite Edition",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "setup-db": "node scripts/setup-db.js"
+    "dev": "nodemon server.js"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "pg": "^8.11.3",
-    "@sendgrid/mail": "^8.1.0",
+    "sqlite3": "^5.1.6",
     "dotenv": "^16.3.1",
     "cors": "^2.8.5",
     "helmet": "^7.1.0",
-    "rate-limiter-flexible": "^4.0.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
