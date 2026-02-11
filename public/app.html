@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Zenith Forms</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <!-- App Navigation -->
+  <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-8">
+          <a href="/" class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <span class="font-bold text-xl">Zenith Forms</span>
+          </a>
+          <div class="hidden md:flex items-center space-x-6">
+            <a href="/app" class="text-primary-600 font-medium border-b-2 border-primary-600 pb-5 pt-5">Dashboard</a>
+            <a href="#" class="text-slate-600 hover:text-slate-900 font-medium pb-5 pt-5">Forms</a>
+            <a href="#" class="text-slate-600 hover:text-slate-900 font-medium pb-5 pt-5">Settings</a>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="text-slate-600 hover:text-slate-900">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+          </button>
+          <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+            <span class="text-primary-700 font-semibold text-sm">U</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Welcome Banner -->
+    <div class="bg-gradient-to-r from-primary-600 to-purple-600 rounded-2xl p-8 text-white mb-8">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">Welcome to Zenith Forms</h1>
+          <p class="text-primary-100 text-lg">Create your first form and start collecting submissions in minutes.</p>
+        </div>
+        <button onclick="showCreateFormModal()" class="mt-4 md:mt-0 bg-white text-primary-600 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 transition-colors flex items-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Create New Form</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <span class="text-green-600 text-sm font-medium">+2 this week</span>
+        </div>
+        <h3 class="text-3xl font-bold text-slate-900">3</h3>
+        <p class="text-slate-600">Active Forms</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+            </svg>
+          </div>
+          <span class="text-green-600 text-sm font-medium">+12 today</span>
+        </div>
+        <h3 class="text-3xl font-bold text-slate-900">47</h3>
+        <p class="text-slate-600">Total Submissions</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <span class="text-slate-400 text-sm font-medium">Blocked</span>
+        </div>
+        <h3 class="text-3xl font-bold text-slate-900">8</h3>
+        <p class="text-slate-600">Spam Blocked</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <span class="text-slate-400 text-sm font-medium">Plan</span>
+        </div>
+        <h3 class="text-3xl font-bold text-slate-900">47%</h3>
+        <p class="text-slate-600">Quota Used</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <!-- Create Form Card -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">Quick Start</h3>
+        <p class="text-slate-600 mb-6">Create a new form endpoint to start collecting submissions.</p>
+        <form onsubmit="handleQuickCreate(event)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Form Name</label>
+            <input type="text" id="quickFormName" required placeholder="e.g., Contact Form" 
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Your Email</label>
+            <input type="email" id="quickFormEmail" required placeholder="you@example.com" 
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none">
+          </div>
+          <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg font-medium transition-colors">
+            Create Form Endpoint
+          </button>
+        </form>
+      </div>
+
+      <!-- API Reference Card -->
+      <div class="bg-slate-900 rounded-xl p-6 text-white">
+        <h3 class="text-lg font-bold mb-4">API Quick Reference</h3>
+        <div class="space-y-4">
+          <div>
+            <p class="text-slate-400 text-sm mb-2">Create a form</p>
+            <code class="block bg-slate-800 rounded-lg p-3 text-sm font-mono text-green-400">
+              POST /api/forms/create
+            </code>
+          </div>
+          <div>
+            <p class="text-slate-400 text-sm mb-2">Submit to form</p>
+            <code class="block bg-slate-800 rounded-lg p-3 text-sm font-mono text-green-400">
+              POST /api/forms/{id}/submit
+            </code>
+          </div>
+          <div>
+            <p class="text-slate-400 text-sm mb-2">Get submissions</p>
+            <code class="block bg-slate-800 rounded-lg p-3 text-sm font-mono text-green-400">
+              GET /api/forms/{id}/submissions
+            </code>
+          </div>
+        </div>
+        <a href="#" class="inline-flex items-center text-primary-400 hover:text-primary-300 mt-4 text-sm font-medium">
+          View full documentation
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Forms List -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-900">Your Forms</h3>
+        <button onclick="showCreateFormModal()" class="text-primary-600 hover:text-primary-700 font-medium text-sm">
+          + New Form
+        </button>
+      </div>
+      <div class="divide-y divide-slate-200">
+        <!-- Form Item 1 -->
+        <div class="p-6 hover:bg-slate-50 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-semibold text-slate-900">Contact Form</h4>
+                <p class="text-sm text-slate-500">32 submissions • Created Jan 15</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">Active</span>
+              <button class="p-2 text-slate-400 hover:text-slate-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center space-x-4 text-sm">
+            <code class="bg-slate-100 px-3 py-1.5 rounded text-slate-600 font-mono">/api/forms/abc-123/submit</code>
+            <button onclick="copyEndpoint('abc-123')" class="text-primary-600 hover:text-primary-700 font-medium">
+              Copy URL
+            </button>
+            <a href="#" class="text-slate-600 hover:text-slate-900 font-medium">
+              View Dashboard →
+            </a>
+          </div>
+        </div>
+
+        <!-- Form Item 2 -->
+        <div class="p-6 hover:bg-slate-50 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-semibold text-slate-900">Newsletter Signup</h4>
+                <p class="text-sm text-slate-500">15 submissions • Created Jan 20</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">Active</span>
+              <button class="p-2 text-slate-400 hover:text-slate-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center space-x-4 text-sm">
+            <code class="bg-slate-100 px-3 py-1.5 rounded text-slate-600 font-mono">/api/forms/def-456/submit</code>
+            <button onclick="copyEndpoint('def-456')" class="text-primary-600 hover:text-primary-700 font-medium">
+              Copy URL
+            </button>
+            <a href="#" class="text-slate-600 hover:text-slate-900 font-medium">
+              View Dashboard →
+            </a>
+          </div>
+        </div>
+
+        <!-- Form Item 3 -->
+        <div class="p-6 hover:bg-slate-50 transition-colors">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-semibold text-slate-900">Support Request</h4>
+                <p class="text-sm text-slate-500">0 submissions • Created Feb 1</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="px-3 py-1 bg-slate-100 text-slate-600 text-sm font-medium rounded-full">Draft</span>
+              <button class="p-2 text-slate-400 hover:text-slate-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center space-x-4 text-sm">
+            <code class="bg-slate-100 px-3 py-1.5 rounded text-slate-600 font-mono">/api/forms/ghi-789/submit</code>
+            <button onclick="copyEndpoint('ghi-789')" class="text-primary-600 hover:text-primary-700 font-medium">
+              Copy URL
+            </button>
+            <a href="#" class="text-slate-600 hover:text-slate-900 font-medium">
+              View Dashboard →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Submissions -->
+    <div class="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-900">Recent Submissions</h3>
+        <a href="#" class="text-primary-600 hover:text-primary-700 font-medium text-sm">View All</a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Form</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Data</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Time</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="hover:bg-slate-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Contact Form</td>
+              <td class="px-6 py-4 text-sm text-slate-600">
+                <code class="bg-slate-100 px-2 py-1 rounded text-xs">{"name":"John","email":"john@example.com"}</code>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">2 minutes ago</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Valid</span>
+              </td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Newsletter</td>
+              <td class="px-6 py-4 text-sm text-slate-600">
+                <code class="bg-slate-100 px-2 py-1 rounded text-xs">{"email":"sarah@example.com"}</code>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">1 hour ago</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Valid</span>
+              </td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Contact Form</td>
+              <td class="px-6 py-4 text-sm text-slate-600">
+                <code class="bg-slate-100 px-2 py-1 rounded text-xs">{"name":"Bot","_website":"spam"}</code>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">3 hours ago</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Spam</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Create Form Modal -->
+  <div id="createFormModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeCreateFormModal()"></div>
+    <div class="relative flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-slate-900">Create New Form</h3>
+          <button onclick="closeCreateFormModal()" class="text-slate-400 hover:text-slate-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <form onsubmit="handleCreateForm(event)" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Form Name</label>
+            <input type="text" id="formName" required placeholder="e.g., Contact Form, Newsletter Signup" 
+              class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Owner Email</label>
+            <input type="email" id="formEmail" required placeholder="you@example.com" 
+              class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all">
+            <p class="text-sm text-slate-500 mt-1">We'll send submission notifications to this email.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Honeypot Field (Optional)</label>
+            <input type="text" id="honeypotField" placeholder="_website" value="_website"
+              class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all">
+            <p class="text-sm text-slate-500 mt-1">Field name for spam bot detection. Leave default for best results.</p>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="enableNotifications" checked class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500">
+            <label for="enableNotifications" class="ml-2 text-sm text-slate-700">Enable email notifications for new submissions</label>
+          </div>
+          <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-semibold transition-colors">
+            Create Form
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <span id="toastMessage">Copied to clipboard!</span>
+  </div>
+
+  <script>
+    // Modal functions
+    function showCreateFormModal() {
+      document.getElementById('createFormModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeCreateFormModal() {
+      document.getElementById('createFormModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    
+    // Copy endpoint URL
+    function copyEndpoint(formId) {
+      const url = `${window.location.origin}/api/forms/${formId}/submit`;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('Endpoint URL copied to clipboard!');
+      });
+    }
+    
+    // Show toast notification
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      toastMessage.textContent = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+    
+    // Handle quick create form
+    function handleQuickCreate(e) {
+      e.preventDefault();
+      const name = document.getElementById('quickFormName').value;
+      const email = document.getElementById('quickFormEmail').value;
+      
+      // Simulate API call
+      showToast(`Creating form "${name}"...`);
+      
+      setTimeout(() => {
+        showToast(`Form "${name}" created successfully!`);
+        document.getElementById('quickFormName').value = '';
+        document.getElementById('quickFormEmail').value = '';
+      }, 1500);
+    }
+    
+    // Handle create form from modal
+    function handleCreateForm(e) {
+      e.preventDefault();
+      const name = document.getElementById('formName').value;
+      const email = document.getElementById('formEmail').value;
+      
+      showToast(`Creating form "${name}"...`);
+      closeCreateFormModal();
+      
+      setTimeout(() => {
+        showToast(`Form "${name}" created successfully!`);
+        e.target.reset();
+      }, 1500);
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCreateFormModal();
+      }
+    });
+  </script>
+</body>
+</html>
