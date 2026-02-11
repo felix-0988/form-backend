@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zenith Forms — Form Backend for Static Sites</title>
+  <meta name="description" content="The form backend built for developers. No backend code required. Just point your form and start collecting submissions.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-text {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+    }
+    .code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <span class="font-bold text-xl">Zenith Forms</span>
+        </div>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#features" class="text-slate-600 hover:text-slate-900 transition-colors">Features</a>
+          <a href="#pricing" class="text-slate-600 hover:text-slate-900 transition-colors">Pricing</a>
+          <a href="#docs" class="text-slate-600 hover:text-slate-900 transition-colors">Docs</a>
+          <a href="/app" class="text-slate-600 hover:text-slate-900 transition-colors">Dashboard</a>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button onclick="showLoginModal()" class="hidden md:block text-slate-600 hover:text-slate-900 font-medium">Sign In</button>
+          <button onclick="showSignupModal()" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium transition-all hover:shadow-lg hover:shadow-primary-500/25">
+            Get Started Free
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
+    <!-- Background decoration -->
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full">
+        <div class="absolute top-20 left-1/4 w-72 h-72 bg-primary-400/20 rounded-full blur-3xl"></div>
+        <div class="absolute top-40 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-20 left-1/3 w-80 h-80 bg-pink-400/20 rounded-full blur-3xl"></div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-4xl mx-auto">
+        <div class="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-full px-4 py-1.5 mb-8 animate-fade-in">
+          <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+          <span class="text-sm text-slate-600">Now with spam protection & email notifications</span>
+        </div>
+        
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 animate-slide-up">
+          Form backend for
+          <span class="gradient-text">static sites</span>
+        </h1>
+        
+        <p class="text-xl md:text-2xl text-slate-600 mb-10 max-w-2xl mx-auto animate-slide-up" style="animation-delay: 0.1s;">
+          No backend code required. Connect your HTML forms in seconds. 
+          We handle submissions, spam protection, and email notifications.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style="animation-delay: 0.2s;">
+          <button onclick="showSignupModal()" class="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl hover:shadow-primary-500/25 hover:-translate-y-0.5">
+            Start Building Free
+          </button>
+          <a href="#how-it-works" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-lg">
+            See How It Works
+          </a>
+        </div>
+        
+        <p class="mt-6 text-sm text-slate-500 animate-slide-up" style="animation-delay: 0.3s;">
+          ✓ No credit card required &nbsp;•&nbsp; ✓ 100 submissions/month free &nbsp;•&nbsp; ✓ Setup in 30 seconds
+        </p>
+      </div>
+    </div>
+
+    <!-- Code Preview -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 animate-slide-up" style="animation-delay: 0.4s;">
+      <div class="bg-slate-900 rounded-2xl shadow-2xl shadow-slate-900/20 overflow-hidden border border-slate-800">
+        <div class="flex items-center space-x-2 px-4 py-3 bg-slate-800/50 border-b border-slate-700">
+          <div class="w-3 h-3 rounded-full bg-red-500"></div>
+          <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+          <div class="w-3 h-3 rounded-full bg-green-500"></div>
+          <span class="ml-4 text-slate-400 text-sm font-mono">index.html</span>
+        </div>
+        <div class="p-6 overflow-x-auto">
+          <pre class="text-sm md:text-base font-mono leading-relaxed"><code class="language-html"><span class="text-slate-500">&lt;!-- Just change the form action --&gt;</span>
+<span class="text-purple-400">&lt;form</span> <span class="text-sky-400">action</span>=<span class="text-green-400">"https://forms.zenithstudio.app/api/forms/YOUR_FORM_ID/submit"</span> <span class="text-sky-400">method</span>=<span class="text-green-400">"POST"</span><span class="text-purple-400">&gt;</span>
+  <span class="text-purple-400">&lt;input</span> <span class="text-sky-400">type</span>=<span class="text-green-400">"text"</span> <span class="text-sky-400">name</span>=<span class="text-green-400">"name"</span> <span class="text-sky-400">placeholder</span>=<span class="text-green-400">"Your name"</span> <span class="text-sky-400">required</span><span class="text-purple-400">&gt;</span>
+  <span class="text-purple-400">&lt;input</span> <span class="text-sky-400">type</span>=<span class="text-green-400">"email"</span> <span class="text-sky-400">name</span>=<span class="text-green-400">"email"</span> <span class="text-sky-400">placeholder</span>=<span class="text-green-400">"you@example.com"</span> <span class="text-sky-400">required</span><span class="text-purple-400">&gt;</span>
+  <span class="text-purple-400">&lt;textarea</span> <span class="text-sky-400">name</span>=<span class="text-green-400">"message"</span> <span class="text-sky-400">placeholder</span>=<span class="text-green-400">"Your message"</span><span class="text-purple-400">&gt;&lt;/textarea&gt;</span>
+  
+  <span class="text-slate-500">&lt;!-- Honeypot spam protection (auto-added) --&gt;</span>
+  <span class="text-purple-400">&lt;input</span> <span class="text-sky-400">type</span>=<span class="text-green-400">"text"</span> <span class="text-sky-400">name</span>=<span class="text-green-400">"_website"</span> <span class="text-sky-400">style</span>=<span class="text-green-400">"display:none"</span> <span class="text-sky-400">tabindex</span>=<span class="text-green-400">"-1"</span><span class="text-purple-400">&gt;</span>
+  
+  <span class="text-purple-400">&lt;button</span> <span class="text-sky-400">type</span>=<span class="text-green-400">"submit"</span><span class="text-purple-400">&gt;</span>Send Message<span class="text-purple-400">&lt;/button&gt;</span>
+<span class="text-purple-400">&lt;/form&gt;</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Logos/Trust Section -->
+  <section class="py-12 border-y border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-sm font-medium text-slate-500 uppercase tracking-wide mb-8">
+        Works with any static site generator
+      </p>
+      <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60">
+        <div class="flex items-center space-x-2 text-slate-700 font-semibold text-lg">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 19h20L12 2zm0 3.5L17.5 17h-11L12 5.5z"/></svg>
+          <span>Next.js</span>
+        </div>
+        <div class="flex items-center space-x-2 text-slate-700 font-semibold text-lg">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm-1 5v4H7v2h4v4h2v-4h4v-2h-4V7h-2z"/></svg>
+          <span>Astro</span>
+        </div>
+        <div class="flex items-center space-x-2 text-slate-700 font-semibold text-lg">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span>Hugo</span>
+        </div>
+        <div class="flex items-center space-x-2 text-slate-700 font-semibold text-lg">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          <span>Gatsby</span>
+        </div>
+        <div class="flex items-center space-x-2 text-slate-700 font-semibold text-lg">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L1.605 6v12L12 24l10.395-6V6L12 0zm6.15 15.75l-1.8 1.05-1.8-1.05v-2.1l1.8-1.05 1.8 1.05v2.1zM12 6.15l6.15 3.6-6.15 3.6-6.15-3.6 6.15-3.6z"/></svg>
+          <span>Jekyll</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-primary-600 font-semibold text-sm uppercase tracking-wide mb-3">Features</h2>
+        <h3 class="text-4xl font-bold text-slate-900 mb-4">Everything you need for forms</h3>
+        <p class="text-xl text-slate-600">Built for developers who want powerful forms without the backend hassle.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="feature-card bg-slate-50 rounded-2xl p-8 transition-all duration-300 border border-slate-100">
+          <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h4 class="text-xl font-bold text-slate-900 mb-3">Instant Setup</h4>
+          <p class="text-slate-600 leading-relaxed">Create a form endpoint in seconds. Just change your form's action attribute and you're done.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card bg-slate-50 rounded-2xl p-8 transition-all duration-300 border border-slate-100">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <h4 class="text-xl font-bold text-slate-900 mb-3">Spam Protection</h4>
+          <p class="text-slate-600 leading-relaxed">Built-in honeypot fields catch bots silently. No annoying CAPTCHAs for your users.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card bg-slate-50 rounded-2xl p-8 transition-all duration-300 border border-slate-100">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <h4 class="text-xl font-bold text-slate-900 mb-3">Email Notifications</h4>
+          <p class="text-slate-600 leading-relaxed">Get instant email alerts for every submission. Never miss a lead or message again.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card bg-slate-50 rounded-2xl p-8 transition-all duration-300 border border-slate-100">
+          <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h4 class="text-xl font-bold text-slate-900 mb-3">Submission Dashboard</h4>
+          <p class="text-slate-600 leading-relaxed">Beautiful dashboard to view, filter, and export all your form submissions in real-time.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card bg-slate-50 rounded-2xl p-8 transition-all duration-300 border border-slate-100">
+          <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <h4 class="text-xl font-bold text-slate-900 mb-3">REST API</h4>
+          <p class="text-slate-600 leading-relaxed">Full REST API access to fetch submissions programmatically. JSON responses, simple auth.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card bg-slate-50 rounded-2xl p-8 transition-all duration-300 border border-slate-100">
+          <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+          </div>
+          <h4 class="text-xl font-bold text-slate-900 mb-3">Rate Limiting</h4>
+          <p class="text-slate-600 leading-relaxed">Automatic rate limiting protects your forms from abuse. Configurable per-form limits.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-primary-600 font-semibold text-sm uppercase tracking-wide mb-3">How It Works</h2>
+        <h3 class="text-4xl font-bold text-slate-900 mb-4">Three steps to working forms</h3>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Step 1 -->
+        <div class="relative">
+          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 h-full">
+            <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-6">1</div>
+            <h4 class="text-xl font-bold text-slate-900 mb-3">Create Your Form</h4>
+            <p class="text-slate-600 mb-6">Sign up and create a new form endpoint. We'll give you a unique form ID and submit URL.</p>
+            <div class="bg-slate-100 rounded-lg p-4 font-mono text-sm text-slate-700">
+              POST /api/forms/create
+            </div>
+          </div>
+          <div class="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+            <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative">
+          <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 h-full">
+            <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-6">2</div>
+            <h4 class="text-xl font-bold text-slate-900 mb-3">Connect Your HTML</h4>
+            <p class="text-slate-600 mb-6">Point your form's action attribute to our endpoint. Works with any HTML form, no JavaScript needed.</p>
+            <div class="bg-slate-100 rounded-lg p-4 font-mono text-sm text-slate-700">
+              action=".../api/forms/{id}/submit"
+            </div>
+          </div>
+          <div class="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+            <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 h-full">
+          <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-6">3</div>
+          <h4 class="text-xl font-bold text-slate-900 mb-3">Collect Submissions</h4>
+          <p class="text-slate-600 mb-6">Submissions flow into your dashboard instantly. Get email notifications and view analytics.</p>
+          <div class="bg-slate-100 rounded-lg p-4 font-mono text-sm text-slate-700">
+            GET /dashboard/{id}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-primary-600 font-semibold text-sm uppercase tracking-wide mb-3">Pricing</h2>
+        <h3 class="text-4xl font-bold text-slate-900 mb-4">Simple, transparent pricing</h3>
+        <p class="text-xl text-slate-600">Start free, upgrade when you need more. <span class="text-amber-600 font-semibold">Ultra-low early access pricing.</span></p>
+        <p class="text-sm text-slate-500 mt-2 mb-6">🔥 Lock in now — prices will increase as we validate demand.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <!-- Free Plan -->
+        <div class="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+          <h4 class="text-xl font-bold text-slate-900 mb-2">Starter</h4>
+          <p class="text-slate-600 mb-6">For side projects & experiments</p>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-slate-900">$0</span>
+            <span class="text-slate-600">/month</span>
+          </div>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              100 submissions/month
+            </li>
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              3 forms
+            </li>
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Email notifications
+            </li>
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Spam protection
+            </li>
+          </ul>
+          <button onclick="showSignupModal()" class="w-full py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-xl hover:border-slate-400 transition-colors">
+            Get Started
+          </button>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="bg-slate-900 rounded-2xl p-8 border border-slate-800 relative transform md:-translate-y-4">
+          <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+            <span class="bg-primary-600 text-white text-sm font-semibold px-4 py-1 rounded-full">Most Popular</span>
+          </div>
+          <h4 class="text-xl font-bold text-white mb-2">Pro</h4>
+          <p class="text-slate-400 mb-2">For growing businesses</p>
+          <p class="text-amber-400 text-xs mb-4">🔥 Early access pricing — validate the product, then we'll raise prices. Lock in now.</p>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-white">$2</span>
+            <span class="text-slate-400">/month</span>
+          </div>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center text-slate-300">
+              <svg class="w-5 h-5 text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              1,000 submissions/month
+            </li>
+            <li class="flex items-center text-slate-300">
+              <svg class="w-5 h-5 text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Unlimited forms
+            </li>
+            <li class="flex items-center text-slate-300">
+              <svg class="w-5 h-5 text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Custom redirects
+            </li>
+            <li class="flex items-center text-slate-300">
+              <svg class="w-5 h-5 text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              File uploads (5MB)
+            </li>
+            <li class="flex items-center text-slate-300">
+              <svg class="w-5 h-5 text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Webhooks
+            </li>
+          </ul>
+          <button onclick="showSignupModal()" class="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors">
+            Start Free Trial
+          </button>
+        </div>
+
+        <!-- Business Plan -->
+        <div class="bg-slate-50 rounded-2xl p-8 border border-slate-200">
+          <h4 class="text-xl font-bold text-slate-900 mb-2">Business</h4>
+          <p class="text-slate-600 mb-6">For teams & agencies</p>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-slate-900">$29</span>
+            <span class="text-slate-600">/month</span>
+          </div>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              10,000 submissions/month
+            </li>
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Unlimited forms
+            </li>
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              File uploads (25MB)
+            </li>
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Team collaboration
+            </li>
+            <li class="flex items-center text-slate-700">
+              <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Priority support
+            </li>
+          </ul>
+          <button onclick="showSignupModal()" class="w-full py-3 border-2 border-slate-300 text-slate-700 font-semibold rounded-xl hover:border-slate-400 transition-colors">
+            Contact Sales
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-24 bg-slate-900">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h3 class="text-4xl md:text-5xl font-bold text-white mb-6">Ready to simplify your forms?</h3>
+      <p class="text-xl text-slate-400 mb-10">Join thousands of developers who trust Zenith Forms for their form backends.</p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button onclick="showSignupModal()" class="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:shadow-xl hover:shadow-primary-500/25">
+          Get Started Free
+        </button>
+        <a href="https://github.com/felix-0988/form-backend" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all">
+          View on GitHub
+        </a>
+      </div>
+      <p class="mt-6 text-slate-500">No credit card required. 100 submissions/month free.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-800 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <span class="font-bold text-xl text-white">Zenith Forms</span>
+          </div>
+          <p class="text-slate-400">The form backend built for developers. Simple, powerful, and reliable.</p>
+        </div>
+        <div>
+          <h5 class="font-semibold text-white mb-4">Product</h5>
+          <ul class="space-y-2 text-slate-400">
+            <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+            <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Changelog</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Roadmap</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="font-semibold text-white mb-4">Resources</h5>
+          <ul class="space-y-2 text-slate-400">
+            <li><a href="#" class="hover:text-white transition-colors">Documentation</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">API Reference</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Examples</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="font-semibold text-white mb-4">Company</h5>
+          <ul class="space-y-2 text-slate-400">
+            <li><a href="#" class="hover:text-white transition-colors">About</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Privacy</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-slate-500 text-sm">© 2025 Zenith Forms. All rights reserved.</p>
+        <div class="flex items-center space-x-6 mt-4 md:mt-0">
+          <a href="#" class="text-slate-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </a>
+          <a href="#" class="text-slate-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Signup Modal -->
+  <div id="signupModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeSignupModal()"></div>
+    <div class="relative flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-slide-up">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-slate-900">Create your account</h3>
+          <button onclick="closeSignupModal()" class="text-slate-400 hover:text-slate-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <form class="space-y-4" onsubmit="handleSignup(event)">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="you@example.com">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <input type="password" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="••••••••">
+          </div>
+          <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-semibold transition-colors">
+            Create Account
+          </button>
+        </form>
+        <div class="mt-6 text-center">
+          <p class="text-slate-600">Already have an account? <button onclick="closeSignupModal(); showLoginModal();" class="text-primary-600 font-semibold hover:underline">Sign in</button></p>
+        </div>
+        <div class="mt-6 pt-6 border-t border-slate-200">
+          <p class="text-xs text-slate-500 text-center">By signing up, you agree to our Terms of Service and Privacy Policy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeLoginModal()"></div>
+    <div class="relative flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-slide-up">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-slate-900">Sign in</h3>
+          <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <form class="space-y-4" onsubmit="handleLogin(event)">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="you@example.com">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <input type="password" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="••••••••">
+          </div>
+          <div class="flex items-center justify-between">
+            <label class="flex items-center">
+              <input type="checkbox" class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500">
+              <span class="ml-2 text-sm text-slate-600">Remember me</span>
+            </label>
+            <a href="#" class="text-sm text-primary-600 font-semibold hover:underline">Forgot password?</a>
+          </div>
+          <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-xl font-semibold transition-colors">
+            Sign In
+          </button>
+        </form>
+        <div class="mt-6 text-center">
+          <p class="text-slate-600">Don't have an account? <button onclick="closeLoginModal(); showSignupModal();" class="text-primary-600 font-semibold hover:underline">Sign up</button></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Modal functions
+    function showSignupModal() {
+      document.getElementById('signupModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeSignupModal() {
+      document.getElementById('signupModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    
+    function showLoginModal() {
+      document.getElementById('loginModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeLoginModal() {
+      document.getElementById('loginModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    
+    // Handle form submissions (placeholder)
+    function handleSignup(e) {
+      e.preventDefault();
+      alert('Account creation coming soon! For now, you can create forms directly via the API.');
+      closeSignupModal();
+    }
+    
+    function handleLogin(e) {
+      e.preventDefault();
+      alert('Login coming soon! For now, access your dashboard with your form token.');
+      closeLoginModal();
+    }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+    
+    // Close modals on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSignupModal();
+        closeLoginModal();
+      }
+    });
+  </script>
+</body>
+</html>
