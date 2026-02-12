@@ -476,18 +476,13 @@ app.get('/dashboard/:formId', async (req, res) => {
 
 // === Homepage ===
 app.get('/', (req, res) => {
-  res.json({
-    service: 'Form Backend-as-a-Service',
-    version: '1.0.0',
-    database: 'SQLite',
-    endpoints: {
-      create_form: 'POST /api/forms/create',
-      submit: 'POST /api/forms/:formId/submit',
-      submissions_api: 'GET /api/forms/:formId/submissions?token=xxx',
-      dashboard: 'GET /dashboard/:formId?token=xxx'
-    },
-    documentation: 'See README.md in the repository'
-  });
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// === App Dashboard ===
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'app.html'));
+});
 });
 
 // Error handler
