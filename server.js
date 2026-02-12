@@ -7,6 +7,8 @@ const cors = require('cors');
 const crypto = require('crypto');
 const fs = require('fs');
 
+const stripeRoutes = require('./routes/stripe');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_PATH = process.env.DB_PATH || './data/forms.db';
@@ -136,11 +138,17 @@ function dbRun(sql, params = []) {
   });
 }
 
+// Stripe webhook route - must be before express.json()
+app.use('/webhook', stripeRoutes);
+
 // Middleware
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Stripe checkout route
+app.use('/create-checkout-session', stripeRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
